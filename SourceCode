@@ -1,0 +1,51 @@
+import argparse
+from pathlib import Path
+from .models import init_db
+from .students import add_student, get_students
+from .courses import add_course, get_courses
+
+DEFAULT_DB = Path(__file__).resolve().parents[2].joinpath("Database", "ums.db")
+
+def seed(db_path):
+    add_student(db_path, "Alice Adams", "alice@example.edu")
+    add_student(db_path, "Bob Brown", "bob@example.edu")
+    add_course(db_path, "CS101", "Intro to Computer Science")
+
+def cli():
+    parser = argparse.ArgumentParser(description="UMS CLI (demo)")
+    sub = parser.add_subparsers(dest="cmd")
+
+    init = sub.add_parser("init-db")
+    init.add_argument("--db", default=str(DEFAULT_DB))
+
+    sd = sub.add_parser("seed")
+    sd.add_argument("--db", default=str(DEFAULT_DB))
+
+    addst = sub.add_parser("add-student")
+    addst.add_argument("name")
+    addst.add_argument("email")
+    addst.add_argument("--db", default=str(DEFAULT_DB))
+
+    listst = sub.add_parser("list-students")
+    listst.add_argument("--db", default=str(DEFAULT_DB))
+
+    args = parser.parse_args()
+    if args.cmd == "init-db":
+        init_db(args.db)
+        print("DB initialized at", args.db)
+    elif args.cmd == "seed":
+        init_db(args.db)
+        seed(args.db)
+        print("Seeded DB at", args.db)
+    elif args.cmd == "add-student":
+        init_db(args.db)
+        sid = add_student(args.db, args.name, args.email)
+        print("Added student id", sid)
+    elif args.cmd == "list-students":
+        for s in get_students(args.db):
+            print(s)
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    cli()
