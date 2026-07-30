@@ -1,0 +1,11 @@
+from app.models import init_db
+from app.courses import add_course, get_courses
+import tempfile
+
+def test_add_and_get_courses(tmp_path):
+    db = tmp_path / "test.db"
+    init_db(str(db))
+    cid = add_course(str(db), "MATH100", "Basic Math")
+    assert isinstance(cid, int)
+    courses = get_courses(str(db))
+    assert any(c["code"] == "MATH100" for c in courses)
